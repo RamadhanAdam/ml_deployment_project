@@ -1,0 +1,12 @@
+data/
+__pycache__/
+*.pyc
+.git
+*.db
+mlruns/
+mlflow.db
+.DS_Store
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
