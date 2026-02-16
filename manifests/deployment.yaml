@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictor-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: predictor-api
+  template:
+    metadata:
+      labels:
+        app: predictor-api
+    spec:
+      containers:
+        - name: predictor-container
+          image: ramadhanzome/fastapi-prediction-api:latest
+          ports:
+          - containerPort : 8000 

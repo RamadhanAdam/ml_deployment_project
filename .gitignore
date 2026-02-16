@@ -10,3 +10,4 @@ mlflow.db
 .pytest_cache/
 .coverage
 htmlcov/
+.env
