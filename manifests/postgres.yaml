@@ -1,0 +1,72 @@
+# ─────────────────────────────────────
+# RESOURCE 1: The Headless Service
+# This gives each pod its own DNS name
+# ─────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc             # pods reach Postgres at "postgres-svc" hostname
+  namespace: predictor
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432                   # 5432 is Postgres's default port
+      name: postgres
+  clusterIP: None               # THIS is what makes it headless — no virtual IP, direct pod access
+  selector:
+    app: postgres                 # this must match the pod labels in the StatefulSet below
+---
+# ─────────────────────────────────────
+# RESOURCE 2: The StatefulSet
+# This manages the Postgres pod(s)
+# ─────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres-ss               # pods will be named postgres-ss-0, postgres-ss-1, etc
+  namespace: predictor
+spec:
+  serviceName: postgres-svc       # ties this StatefulSet to the headless service above — required field
+  replicas: 1                     # only one Postgres pod — a local project doesn't need primary/replica
+  selector:
+    matchLabels:
+      app: postgres              # StatefulSet manages pods with this label
+  template:                        # the blueprint for each pod
+    metadata:
+      labels:
+        app: postgres            # MUST match selector.matchLabels and service selector above
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15         # official Postgres image, version 15
+          ports:
+            - containerPort: 5432    # the port the container listens on
+          env:                       # environment variables the Postgres image reads on startup
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:     # read this value FROM a ConfigMap (not sensitive)
+                  name: predictor-config   # name of the ConfigMap
+                  key: POSTGRES_DB         # the specific key inside that ConfigMap
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:       # read this value FROM a Secret (sensitive — username)
+                  name: postgres-secret    # name of the Secret you created in Step 1
+                  key: POSTGRES_USER        # the key inside that Secret
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:       # same pattern — read password from Secret
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-data      # refers to the volumeClaimTemplate name below
+              mountPath: /var/lib/postgresql/data  # where Postgres stores its data files inside the container
+  volumeClaimTemplates:            # THIS is the StatefulSet superpower — NOT volumes (like Deployment uses)
+    - metadata:
+        name: postgres-data         # the PVC created for pod-0 will be named "postgres-data-postgres-ss-0"
+      spec:
+        accessModes: ["ReadWriteOnce"]   # only one pod can mount this volume at a time (correct for a database)
+        storageClassName: local-path    # k3d's dynamic provisioner — no need to write a PersistentVolume yaml
+        resources:
+          requests:
+            storage: 100Mi          # 100 megabytes — plenty for local development     

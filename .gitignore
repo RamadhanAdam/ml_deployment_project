@@ -11,3 +11,10 @@ mlflow.db
 .coverage
 htmlcov/
 .env
+
+keys.txt
+*.agekey
+
+# The plaintext (unencrypted) secret file — never commit this either
+# Only the .enc.yaml version gets committed
+manifests/postgres-secret.yaml

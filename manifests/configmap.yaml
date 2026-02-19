@@ -5,4 +5,5 @@ metadata:
   namespace: predictor
 data:
   MODEL_PATH: /app/models/model.pkl # this becomes an env variable in the container
-  PORT: "8000" # port as env
+  PORT: "8000" # port as env - FastAPI port
+  POSTGRES_DB: "predictions_db" # name of the database Postgres will create

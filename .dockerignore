@@ -11,3 +11,10 @@ mlflow.db
 .coverage
 htmlcov/
 .env
+
+# Encryption key
+keys.txt
+*.agekey
+
+# Secret files keep out of images
+manifests/postgres-secret.yaml

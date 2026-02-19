@@ -1,0 +1,4 @@
+creation_rules:
+  - path_regex: manifests/.*secret.*\.yaml$
+    encrypted_regex: ^(data)$
+    age: age1la3qrlh8tf8cxhecct3gt3kdk6fr9hvvwreew36wje5aa9ae7aws90pd3u
