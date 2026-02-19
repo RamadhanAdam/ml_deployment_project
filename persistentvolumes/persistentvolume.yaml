@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: predictor-pv # name of this storage unit
+spec:
+  storageClassName: predictor-storage # label used to match with the claim
+  capacity:
+    storage: 1Gi # 1 gigabyte of storage
+  volumeMode: Filesystem # mount as a folder inside the pod
+  accessModes:
+    - ReadWriteOnce # only one pod can use it at a time
+  local:
+    path: /tmp/kube # the folder we created on the node
+  nodeAffinity: # which node has this storage
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-predictor-api-server-0 # our node

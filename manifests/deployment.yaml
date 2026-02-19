@@ -12,8 +12,20 @@ spec:
       labels:
         app: predictor-api
     spec:
+      volumes:
+        - name: shared-image # just giving it a name
+          PersistentVolumeClaim: 
+            claimName: predictor-pvc # reference to the PVC we created
       containers:
         - name: predictor-container
           image: ramadhanzome/fastapi-prediction-api:latest
           ports:
-          - containerPort : 8000 
+            - containerPort: 8000
+          volumeMounts:
+            - name: shared-image # the folder we created above
+              mountPath: /app/data # make it appear here inside the container
+        - name: second-container # 2nd container
+          image: nginx # just any image for testing
+          volumeMounts:
+            - name: shared-image # same shared folder
+              mountPath: /app/data # same path
