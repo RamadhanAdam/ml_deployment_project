@@ -26,8 +26,10 @@ USER appuser
 
 # Tell Docker the app listens on port 8000
 # Note: this is documentation only, it doesn't actually open the port
-EXPOSE 8000
+EXPOSE ${PORT:-8000}
 
 # The command that runs when the container starts
 # Starts the FastAPI app, accessible from outside the container (0.0.0.0)
-CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# CMD ["uvicorn", "src.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn src.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# This reads the PORT env variable, and falls back to 8000 if not set

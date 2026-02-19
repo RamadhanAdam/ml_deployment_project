@@ -22,6 +22,9 @@ spec:
           image: ramadhanzome/fastapi-prediction-api:latest
           ports:
             - containerPort: 8000
+          envFrom:
+            - configMapRef:
+              name: prediction-config  # pull all variables from this configmap
           volumeMounts:
             - name: shared-image # the folder we created above
               mountPath: /app/data # make it appear here inside the container

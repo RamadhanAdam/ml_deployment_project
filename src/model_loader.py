@@ -1,6 +1,6 @@
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, message=".*protected namespace.*")
-
+import os
 # import mlflow
 import joblib
 import pandas as pd
@@ -8,7 +8,8 @@ import pandas as pd
 class ModelLoader:
     def __init__(self, model_name = "customer-churn-predictor", stage = "Production") :
         print("Loading model from file...")
-        self.model = joblib.load("/app/models/model.pkl")
+        self.model = joblib.load(os.getenv("MODEL_PATH", "/app/models/model.pkl"))
+        # os.getenv reads the env variable, the second argument is a fallback default
         print("Model loaded successfully!")
         
 
