@@ -1,28 +1,34 @@
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, message=".*protected namespace.*")
 
-import mlflow
+# import mlflow
+import joblib
 import pandas as pd
 
 class ModelLoader:
     def __init__(self, model_name = "customer-churn-predictor", stage = "Production") :
-        # Connecting to MLflow database
-        mlflow.set_tracking_uri("sqlite:///mlflow.db")
+        print("Loading model from file...")
+        self.model = joblib.load("/app/models/model.pkl")
+        print("Model loaded successfully!")
+        
 
-        print(f"Loading model : {model_name}, stage : {stage}")
+        # # Connecting to MLflow database
+        # mlflow.set_tracking_uri("sqlite:///mlflow.db")
 
-        # Loading from Model Registry instead of run_id
-        try:
-            model_uri = f"models:/{model_name}/{stage}"
-            self.model = mlflow.sklearn.load_model(model_uri)
-            print(f"Loaded model from registry : {model_uri}")
+        # print(f"Loading model : {model_name}, stage : {stage}")
 
-        except Exception as e:
-            # Fallback : load latest version if no production model
-            print(f"No {stage} model found, loading latest version...")
-            model_uri = f"models/{model_name}/latest"
-            self.model = mlflow.sklearn.load_model(model_uri=model_uri)
-            print(f"Loaded latest model : {model_uri}")
+        # # Loading from Model Registry instead of run_id
+        # try:
+        #     model_uri = f"models:/{model_name}/{stage}"
+        #     self.model = mlflow.sklearn.load_model(model_uri)
+        #     print(f"Loaded model from registry : {model_uri}")
+
+        # except Exception as e:
+        #     # Fallback : load latest version if no production model
+        #     print(f"No {stage} model found, loading latest version...")
+        #     model_uri = f"models/{model_name}/latest"
+        #     self.model = mlflow.sklearn.load_model(model_uri=model_uri)
+        #     print(f"Loaded latest model : {model_uri}")
         # Features
         self.features = [
             'age', 'income', 'tenure_years', 'num_purchases',

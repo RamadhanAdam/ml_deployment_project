@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1    # Ingress uses a different API than Service
+kind: Ingress                        # This is an Ingress resource
+metadata:
+  name: predictor-api-ingress        # Name of this Ingress
+spec:
+  rules:                             # Rules for routing traffic
+  - http:                            # We're dealing with HTTP traffic
+      paths:
+      - path: /                      # Any request to "/" or anything after it
+        pathType: Prefix             # "Prefix" means "/" matches everything e.g /predict, /docs
+        backend:                     # Send matched traffic to this Service
+          service:
+            name: predictor-api-svc  # The Service we created
+            port:
+              number: 80             # Talk to the Service on port 80
+
+# In plain English: "Any HTTP request that comes in, 
+# send it to predictor-api-svc on port 80". Then the
+#  Service takes it from there and forwards to my 
+#  container on port 8000.

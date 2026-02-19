@@ -2,7 +2,7 @@ from fastapi import FastAPI, Query
 from pydantic import BaseModel
 
 # Import ModelLoader (same folder, so just .model_loader)
-from model_loader import ModelLoader
+from src.model_loader import ModelLoader
 
 app = FastAPI()
 loader = ModelLoader()  # Initialize once, reuse for all requests
