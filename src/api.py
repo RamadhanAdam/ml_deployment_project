@@ -52,6 +52,14 @@ async def predict_get(
     
     return loader.predict(data)
 
+#health endpoint
+@app.get("/health")
+def health_check():
+    # Returns a simple JSON response — {"status": "ok"}
+    # The CronJob will call this to confirm the API is alive
+    return {"status": "ok", "model": "loaded"}
+
+
 # Run with: uvicorn src.api:app --host 0.0.0.0 --port 8000
 
 # from src.model_loader import ModelLoader

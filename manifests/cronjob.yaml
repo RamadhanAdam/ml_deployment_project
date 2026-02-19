@@ -1,0 +1,26 @@
+apiVersion: batch/v1              # batch/v1 is the API group for Jobs and CronJobs
+kind: CronJob
+metadata:
+  name: api-health-check
+  namespace: predictor
+spec:
+  schedule: "*/5 * * * *"         # cron syntax: minute / hour / day / month / weekday
+                                       # */5 in the minute field = "every 5 minutes"
+  jobTemplate:                       # the Job that gets created on each scheduled run
+    spec:
+      template:                      # the Pod that the Job creates
+        spec:
+          containers:
+            - name: health-checker
+              image: curlimages/curl:latest  # tiny image that only has the curl HTTP tool
+              command:
+                - sh                       # run a shell
+                - -c                       # -c means "execute the following string as a command"
+                - |
+                  echo "Health check at $(date)"
+                  # curl -f means "fail with exit code 1 if HTTP status is not 2xx"
+                  # predictor-api-svc is your existing ClusterIP service
+                  curl -f http://predictor-api-svc:80/health \
+                    && echo "API is healthy" \
+                    || echo "API health check FAILED"
+          restartPolicy: OnFailure     # if it fails (non-zero exit), retry it — but stop once it succeeds
