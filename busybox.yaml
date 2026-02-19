@@ -1,0 +1,14 @@
+# Good for debugging
+apiVersion: v1
+kind: Pod # this is a standalone pod, not a deployment
+metadata:
+  name: my-busybox
+  namespace: predictor
+spec:
+  containers:
+  - image: busybox # tiny linux image good for debugging
+    command:
+      - sleep
+      - "3600" # keep it alive for 1 hour
+    name: busybox
+  restartPolicy: Always

@@ -2,6 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: predictor-api-svc
+  namespace: predictor
 spec:
   selector:
     app: predictor-api

@@ -19,3 +19,25 @@ spec:
           operator: In
           values:
           - k3d-predictor-api-server-0 # our node
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: predictor-pv-2 # second PV for predictor namespace
+spec:
+  storageClassName: predictor-storage
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  local:
+    path: /tmp/kube2 # different folder
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - k3d-predictor-api-server-0

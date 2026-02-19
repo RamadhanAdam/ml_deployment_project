@@ -2,6 +2,7 @@ apiVersion: networking.k8s.io/v1    # Ingress uses a different API than Service
 kind: Ingress                        # This is an Ingress resource
 metadata:
   name: predictor-api-ingress        # Name of this Ingress
+  namespace: predictor
 spec:
   rules:                             # Rules for routing traffic
   - http:                            # We're dealing with HTTP traffic
