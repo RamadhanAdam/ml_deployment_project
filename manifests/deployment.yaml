@@ -14,8 +14,8 @@ spec:
     spec:
       volumes:
         - name: shared-image # just giving it a name
-          PersistentVolumeClaim: 
-            claimName: predictor-pvc # reference to the PVC we created
+          persistentVolumeClaim: 
+            claimName: predictor-pvc # reference to the PVC we created , kubernetes matches name via "storageClassName"
       containers:
         - name: predictor-container
           image: ramadhanzome/fastapi-prediction-api:latest

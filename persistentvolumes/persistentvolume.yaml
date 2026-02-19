@@ -11,7 +11,7 @@ spec:
     - ReadWriteOnce # only one pod can use it at a time
   local:
     path: /tmp/kube # the folder we created on the node
-  nodeAffinity: # which node has this storage
+  nodeAffinity: ## This is only required for local, it defines which nodes can access it
     required:
       nodeSelectorTerms:
       - matchExpressions:

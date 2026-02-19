@@ -1,10 +1,11 @@
-appVersion: v1
+apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  - name: preditor-pvc # name used in deployment to reference this claim
-    storageClassName: predictor-storage. # must match PV
-    accessModes:
-      - ReadWriteOnce # same as PV
-    resources:
-      requests:
-        storage: 1Gi # how much storage the pod needs
+  name: predictor-pvc # name used in deployment to request storage
+spec:
+  storageClassName: predictor-storage # must match PV
+  accessModes:
+    - ReadWriteOnce # same as PV
+  resources:
+    requests:
+      storage: 1Gi # how much storage the pod needs
