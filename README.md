@@ -1,6 +1,6 @@
 # ML Deployment Project
 
-A production-style MLOps project running a FastAPI prediction API on Kubernetes, with PostgreSQL for prediction logging, encrypted secrets, scheduled health checks, and a full monitoring stack.
+A production style MLOps project running a FastAPI prediction API on Kubernetes, with PostgreSQL for prediction logging, encrypted secrets, scheduled health checks, and a full monitoring stack.
 
 Built locally using k3d, deployed to a 3-node cluster with Ingress, StatefulSet-backed Postgres, SOPS-encrypted secrets, and Prometheus/Grafana/Loki for observability.
 
