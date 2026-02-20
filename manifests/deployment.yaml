@@ -13,10 +13,6 @@ spec:
       labels:
         app: predictor-api
     spec:
-      volumes:
-        - name: shared-image # just giving it a name
-          persistentVolumeClaim:
-            claimName: predictor-pvc # reference to the PVC we created, kubernetes matches name via "storageClassName"
       containers:
         - name: predictor-container
           image: ramadhanzome/fastapi-prediction-api:latest
@@ -24,12 +20,4 @@ spec:
             - containerPort: 8000
           envFrom:
             - configMapRef:
-                name: predictor-config # pull all variables from this configmap
-          volumeMounts:
-            - name: shared-image # the folder we created above
-              mountPath: /app/data # make it appear here inside the container
-        - name: second-container # 2nd container
-          image: nginx # just any image for testing
-          volumeMounts:
-            - name: shared-image # same shared folder
-              mountPath: /app/data # same path
+                name: predictor-config
