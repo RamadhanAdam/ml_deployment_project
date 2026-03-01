@@ -19,3 +19,4 @@ keys.txt
 # Only the .enc.yaml version gets committed
 manifests/postgres-secret.yamlprivate-key.json
 models/
+private-key.json

@@ -18,3 +18,5 @@ keys.txt
 
 # Secret files keep out of images
 manifests/postgres-secret.yaml
+
+private-key.json

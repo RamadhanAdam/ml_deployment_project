@@ -1,0 +1,79 @@
+name: Release application
+
+on:
+  push:    # trigger on every push to any branch
+
+env:
+  # GKE_PROJECT reads from the GitHub Secret you created
+  PROJECT_ID: ${{ secrets.GKE_PROJECT }}
+  GKE_CLUSTER: dwk-cluster           # my cluster name
+  GKE_ZONE: europe-north1-b           # where my cluster lives
+  REGISTRY: europe-north1-docker.pkg.dev  # Artifact Registry URL for Finland
+  REPOSITORY: my-repository            # the repo you created in Artifact Registry
+  IMAGE: fastapi-prediction-api        # name for the image
+  SERVICE: predictor-api               # my Deployment name in Kubernetes
+  BRANCH: ${{ github.ref_name }}         # current branch name
+
+jobs:
+  build-publish-deploy:
+    name: Build, Publish and Deploy
+    runs-on: ubuntu-latest    # GitHub spins up an Ubuntu VM to run this
+
+    steps:
+      # Step 1: pull my code onto the GitHub runner VM
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Step 2: authenticate to Google Cloud using my service account key
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: '${{ secrets.GKE_SA_KEY }}'
+
+      # Step 3: install gcloud SDK on the runner VM
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      # Step 4: configure Docker to push to Artifact Registry
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker "$REGISTRY"
+
+      # Step 5: get GKE credentials so kubectl can talk to my cluster
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: '${{ env.GKE_CLUSTER }}'
+          project_id: '${{ env.PROJECT_ID }}'
+          location: '${{ env.GKE_ZONE }}'
+
+      # Step 6: construct the full image tag and save it as an env variable
+      # The tag includes: registry/project/repo/image:branch-commitSHA
+      # e.g. europe-north1-docker.pkg.dev/myproject/my-repo/fastapi:main-abc1234
+      - name: Form the image name
+        run: echo "IMAGE_TAG=$REGISTRY/$PROJECT_ID/$REPOSITORY/$IMAGE:$BRANCH-$GITHUB_SHA" >> $GITHUB_ENV
+
+      # Step 7: build the Docker image with that tag
+      - name: Build
+        run: docker build --tag $IMAGE_TAG .
+
+      # Step 8: push the image to Artifact Registry
+      - name: Publish
+        run: docker push $IMAGE_TAG
+
+      # Step 9: install Kustomize on the runner VM
+      - name: Set up Kustomize
+        uses: imranismail/setup-kustomize@v2.1.0
+
+      # Step 10: use Kustomize to update the image tag, apply to cluster, verify rollout
+      - name: Deploy
+        run: |-
+          kustomize edit set image PROJECT/IMAGE=$IMAGE_TAG
+          # ^ updates kustomization.yaml with the new image tag built above
+
+          kustomize build . | kubectl apply -f -
+          # ^ generates the final YAML and pipes it to kubectl
+
+          kubectl rollout status deployment $SERVICE -n predictor
+          # ^ waits until the new pods are Running before marking pipeline as success
+
+          kubectl get services -n predictor -o wide
+          # ^ prints the services so you can see IPs in the pipeline logs
