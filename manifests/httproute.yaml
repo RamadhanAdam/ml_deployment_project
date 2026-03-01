@@ -1,0 +1,17 @@
+apiVersion: gateway.networking.k8s.io/v1beta1  # API group that contains HTTPRoute resources
+kind: HTTPRoute                                  # we are creating a routing rule
+metadata:
+  name: predictor-route                          # name of this route
+  namespace: predictor                           # same namespace as everything else
+spec:
+  parentRefs:
+  - name: predictor-gateway                      # attach this route to the gateway we created above
+  rules:
+  - matches:
+    - path:
+        type: PathPrefix                          # match any path that starts with...
+        value: /                                  # .../ meaning ALL requests
+    backendRefs:
+    backendRefs:
+    - name: predictor-api-svc                    # send matched traffic to this service
+      port: 80                                   # on port 80

@@ -61,12 +61,14 @@ spec:
           volumeMounts:
             - name: postgres-data      # refers to the volumeClaimTemplate name below
               mountPath: /var/lib/postgresql/data  # where Postgres stores its data files inside the container
+              subPath: postgres # tells Postgres to use /data/postgres subdir, not root
   volumeClaimTemplates:            # THIS is the StatefulSet superpower — NOT volumes (like Deployment uses)
     - metadata:
         name: postgres-data         # the PVC created for pod-0 will be named "postgres-data-postgres-ss-0"
       spec:
         accessModes: ["ReadWriteOnce"]   # only one pod can mount this volume at a time (correct for a database)
-        storageClassName: local-path    # k3d's dynamic provisioner — no need to write a PersistentVolume yaml
+        # storageClassName: local-path    # k3d's dynamic provisioner — no need to write a PersistentVolume yaml
+        storageClassName: standard # GKE default — provisions a GCP persistent 
         resources:
           requests:
             storage: 100Mi          # 100 megabytes — plenty for local development     

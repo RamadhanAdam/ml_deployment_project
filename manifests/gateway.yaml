@@ -1,0 +1,14 @@
+apiVersion: gateway.networking.k8s.io/v1beta1  # API group that contains Gateway resources
+kind: Gateway                                    # we are creating a Gateway resource
+metadata:
+  name: predictor-gateway                        # name we use to reference this gateway
+  namespace: predictor                           # same namespace as everything else
+spec:
+  gatewayClassName: gke-l7-global-external-managed  # use GKE's built-in HTTP load balancer
+  listeners:
+  - name: http                                   # name for this listener
+    protocol: HTTP                               # accept HTTP traffic
+    port: 80                                     # on port 80
+    allowedRoutes:
+      kinds:
+      - kind: HTTPRoute                          # only HTTPRoute resources can attach to this gateway

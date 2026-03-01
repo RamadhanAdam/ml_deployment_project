@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
         - name: predictor-container
-          image: ramadhanzome/fastapi-prediction-api:latest
+          # image: ramadhanzome/fastapi-prediction-api:latest
+          image: PROJECT/IMAGE # Kustomize replaces this from kustomization.yaml
           ports:
             - containerPort: 8000
           envFrom:

@@ -10,5 +10,4 @@ spec:
     - port: 80
       targetPort: 8000
       protocol: TCP
-  type: ClusterIP
-
+  type: NodePort # works on k3d, not on GKE with Ingress

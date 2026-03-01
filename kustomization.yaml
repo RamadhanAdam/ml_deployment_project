@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# These files get applied — in this order
+resources:
+  - manifests/configmap.yaml
+  - manifests/postgres.yaml
+  - manifests/deployment.yaml
+  - manifests/service.yaml
+  - manifests/gateway.yaml
+  - manifests/httproute.yaml
+  - manifests/cronjob.yaml
+
+# Tell Kustomize which image to use — this is what the CI/CD pipeline will update
+images:
+  - name: PROJECT/IMAGE           # placeholder — matches what's in deployment.yaml
+    newName: ramadhanzome/fastapi-prediction-api
+    newTag: latest

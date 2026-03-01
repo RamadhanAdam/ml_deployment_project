@@ -1,3 +1,4 @@
+# configuration file that tells SOPS how to encrypt files automatically
 creation_rules:
   - path_regex: manifests/.*secret.*\.yaml$
     encrypted_regex: ^(data)$
