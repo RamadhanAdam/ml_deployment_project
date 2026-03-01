@@ -12,6 +12,5 @@ spec:
         type: PathPrefix                          # match any path that starts with...
         value: /                                  # .../ meaning ALL requests
     backendRefs:
-    backendRefs:
     - name: predictor-api-svc                    # send matched traffic to this service
       port: 80                                   # on port 80
