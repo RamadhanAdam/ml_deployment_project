@@ -19,6 +19,13 @@ spec:
           image: PROJECT/IMAGE # Kustomize replaces this from kustomization.yaml
           ports:
             - containerPort: 8000
+          resources:
+            requests:
+              cpu: "100m"       # 100 millicores = 10% of 1 CPU core — what the pod is guaranteed
+              memory: "128Mi"   # guaranteed memory
+            limits:
+              cpu: "500m"       # 500 millicores = 50% of 1 CPU core — maximum the pod can use
+              memory: "512Mi"   # if pod exceeds this, it gets killed and restarted
           envFrom:
             - configMapRef:
                 name: predictor-config

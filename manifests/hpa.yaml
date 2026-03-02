@@ -1,0 +1,13 @@
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: predictor-api-hpa
+  namespace: predictor
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: predictor-api   # must match your Deployment name exactly
+  minReplicas: 1             # never scale below 1 pod
+  maxReplicas: 5             # never scale above 5 pods
+  targetCPUUtilizationPercentage: 60  # if avg CPU across all pods exceeds 60%, add a replica

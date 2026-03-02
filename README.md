@@ -2,20 +2,20 @@
 
 A production style MLOps project running a FastAPI prediction API on Kubernetes, with PostgreSQL for prediction logging, encrypted secrets, scheduled health checks, and a full monitoring stack.
 
-Built locally using k3d, deployed to a 3-node cluster with Ingress, StatefulSet-backed Postgres, SOPS-encrypted secrets, and Prometheus/Grafana/Loki for observability.
-
+Built locally using k3d, initially deployed with Ingress, then migrated to Gateway API. Also deployed to GKE via GitHub Actions CI/CD, with StatefulSet-backed Postgres, SOPS-encrypted secrets, and Prometheus/Grafana/Loki for observability.
 ---
 
 ## Stack
 
 | Layer | Tech |
 |-------|------|
-| Cluster | k3d (Kubernetes in Docker), kubectl |
+| Cluster | k3d (local), GKE (cloud), kubectl |
 | API | Python, FastAPI, joblib |
 | Database | PostgreSQL 15 (StatefulSet) |
 | Secret management | SOPS + Age encryption |
 | Monitoring | Prometheus, Grafana, Loki, Promtail |
-| Package management | Helm |
+| Package management | Helm, Kustomize |
+| CI/CD | GitHub Actions |
 | Container registry | Docker Hub |
 
 ---
@@ -27,7 +27,7 @@ External traffic (localhost:8081)
         ↓
   k3d LoadBalancer
         ↓
-  Ingress — predictor namespace
+  Gateway API — predictor namespace 
         ↓
   predictor-api-svc (ClusterIP)
         ↓
@@ -47,26 +47,37 @@ CronJob → /health every 5 min → logs → Promtail → Loki → Grafana
 
 ```
 ml_deployment_project/
-  src/
-    api.py
-    model_loader.py
-  models/
-    model.pkl
-  manifests/
-    deployment.yaml
-    service.yaml
-    ingress.yaml
-    configmap.yaml
-    postgres.yaml
-    postgres-secret.enc.yaml   ← encrypted, safe to commit
-    cronjob.yaml
-  .sops.yaml
-  .gitignore
-  .dockerignore
-  Dockerfile
-  requirements.txt
+├── src/
+│   ├── api.py
+│   ├── model_loader.py
+│   ├── train_model.py
+│   └── preprocessing.py
+│
+├── models/
+│   └── model.pkl
+│
+├── manifests/
+│   ├── deployment.yaml
+│   ├── service.yaml
+│   ├── gateway.yaml
+│   ├── httproute.yaml
+│   ├── hpa.yaml
+│   ├── configmap.yaml
+│   ├── postgres.yaml
+│   ├── postgres-secret.enc.yaml   ← encrypted, safe to commit
+│   └── cronjob.yaml
+│
+├── persistentvolumes/
+│   ├── persistentvolume.yaml
+│   └── persistentvolumeclaim.yaml
+│
+├── kustomization.yaml
+├── Dockerfile
+├── requirements.txt
+├── .sops.yaml
+└── README.md
 ```
-
+*Local artifacts (mlruns, service account keys, plaintext secrets) are excluded via .gitignore.*
 ---
 
 ## Secret Management
@@ -113,7 +124,9 @@ kubectl apply -f manifests/configmap.yaml
 kubectl apply -f manifests/postgres.yaml
 kubectl apply -f manifests/deployment.yaml
 kubectl apply -f manifests/service.yaml
-kubectl apply -f manifests/ingress.yaml
+kubectl apply -f manifests/gateway.yaml
+kubectl apply -f manifests/httproute.yaml
+kubectl apply -f manifests/hpa.yaml
 kubectl apply -f manifests/cronjob.yaml
 ```
 
@@ -160,12 +173,36 @@ Open `http://localhost:3000`, log in as `admin`.
 To connect Loki: Connections → Data sources → Add Loki → URL: `http://loki.loki-stack:3100`
 
 ---
+## Cloud Deployment (GKE)
+
+This project is also deployed to Google Kubernetes Engine (GKE) using GitHub Actions CI/CD.
+
+High-level steps:
+
+1. Create a GKE cluster
+2. Configure Workload Identity / service account
+3. Store secrets securely
+4. GitHub Actions builds and pushes the Docker image
+5. GitHub Actions deploys manifests to GKE via kubectl
+6. Gateway API exposes service via cloud LoadBalancer
+
+---
+
+| Aspect        | DBaaS (Cloud SQL) | Self-Hosted (StatefulSet) |
+|---------------|-------------------|----------------------------|
+| **Setup Time** | Minutes — click through console or one `gcloud` command | Hours — write StatefulSet, headless service, PVC, configure init |
+| **Maintenance** | Google handles patches, minor version upgrades, failover | You handle everything — upgrades, monitoring, crash recovery |
+| **Backups** | Built-in automated backups, point-in-time recovery, one-click restore | You write CronJobs, manage backup storage, test restore procedures |
+| **Cost** | Higher — Cloud SQL `db-f1-micro` starts ~$9/month, scales up fast | Lower — just the compute you're already paying for |
+| **Reliability** | SLA-backed, automatic failover to replica | As reliable as you make it — single StatefulSet pod is a single point of failure |
+| **Scaling** | Vertical scaling with a few clicks, read replicas easily added | Manual — modify StatefulSet, handle primary/replica logic yourself |
+| **Portability** | Locked to GCP — migrating requires data export/import | Runs anywhere Kubernetes runs — EKS, AKS, on-prem, local |
+| **Good For** | Production systems where uptime and maintenance burden matter | Learning, portability, cost-sensitive projects, full control |
 
 ## Roadmap
 
-- [ ] Prediction logging to PostgreSQL from the API
-- [ ] AWS EKS deployment
-- [ ] SageMaker model training pipeline
+- [ ] Postgres high availability setup
+- [ ] Terraform infrastructure provisioning
+- [ ] GitOps with ArgoCD or Flux
 - [ ] Triton Inference Server for model serving
-- [ ] Kubeflow pipelines
-- [ ] Redis feature store / prediction cache in front of Triton
+- [ ] Redis feature store / prediction cache
