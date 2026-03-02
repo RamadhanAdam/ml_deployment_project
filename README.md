@@ -1,4 +1,5 @@
 # ML Deployment Project
+[![Release application](https://github.com/RamadhanAdam/ml_deployment_project/actions/workflows/main.yaml/badge.svg)](https://github.com/RamadhanAdam/ml_deployment_project/actions/workflows/main.yaml)
 
 A production style MLOps project running a FastAPI prediction API on Kubernetes, with PostgreSQL for prediction logging, encrypted secrets, scheduled health checks, and a full monitoring stack.
 
