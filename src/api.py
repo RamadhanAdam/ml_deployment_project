@@ -7,6 +7,7 @@ from src.model_loader import ModelLoader
 app = FastAPI()
 loader = ModelLoader()  # Initialize once, reuse for all requests
 
+
 # Data Model
 class CustomerData(BaseModel):
     age: int = 25
@@ -19,14 +20,17 @@ class CustomerData(BaseModel):
     has_credit_card: int = 0
     is_newsletter_subscribed: int = 0
 
-@app.get('/')
+
+@app.get("/")
 async def api_root():
     return {"message": "ML Prediction API"}
+
 
 @app.post("/predict/")
 async def predict(data: CustomerData):
     """POST predict with JSON body"""
     return loader.predict(data.dict())
+
 
 @app.get("/predict/")
 async def predict_get(
@@ -38,21 +42,25 @@ async def predict_get(
     days_since_last_purchase: int = 10,
     satisfaction_score: int = 3,
     has_credit_card: int = 0,
-    is_newsletter_subscribed: int = 0
+    is_newsletter_subscribed: int = 0,
 ):
     """GET predict with query parameters"""
     data = {
-        "age": age, "income": income, "tenure_years": tenure_years,
-        "num_purchases": num_purchases, "website_visits": website_visits,
+        "age": age,
+        "income": income,
+        "tenure_years": tenure_years,
+        "num_purchases": num_purchases,
+        "website_visits": website_visits,
         "days_since_last_purchase": days_since_last_purchase,
         "satisfaction_score": satisfaction_score,
         "has_credit_card": has_credit_card,
-        "is_newsletter_subscribed": is_newsletter_subscribed
+        "is_newsletter_subscribed": is_newsletter_subscribed,
     }
-    
+
     return loader.predict(data)
 
-#health endpoint
+
+# health endpoint
 @app.get("/health")
 def health_check():
     # Returns a simple JSON response — {"status": "ok"}
@@ -89,7 +97,7 @@ def health_check():
 #     data: CustomerData,
 #     run_id: str = Query(None, description="MLflow run ID (optional, uses latest if not provided)")
 # ):
-#     loader = ModelLoader()  
+#     loader = ModelLoader()
 #     return loader.predict(data.dict())
 
 # @app.get("/predict/")
@@ -113,8 +121,8 @@ def health_check():
 #         "has_credit_card": has_credit_card,
 #         "is_newsletter_subscribed": is_newsletter_subscribed
 #     }
-    
-#     loader = ModelLoader()  
+
+#     loader = ModelLoader()
 #     return loader.predict(data)
 
 # # uvicorn src.api:app --host 0.0.0.0 --port 8000

@@ -1,17 +1,21 @@
 import warnings
-warnings.filterwarnings("ignore", category=UserWarning, message=".*protected namespace.*")
+
+warnings.filterwarnings(
+    "ignore", category=UserWarning, message=".*protected namespace.*"
+)
 import os
+
 # import mlflow
 import joblib
 import pandas as pd
 
+
 class ModelLoader:
-    def __init__(self, model_name = "customer-churn-predictor", stage = "Production") :
+    def __init__(self, model_name="customer-churn-predictor", stage="Production"):
         print("Loading model from file...")
         self.model = joblib.load(os.getenv("MODEL_PATH", "/app/models/model.pkl"))
         # os.getenv reads the env variable, the second argument is a fallback default
         print("Model loaded successfully!")
-        
 
         # # Connecting to MLflow database
         # mlflow.set_tracking_uri("sqlite:///mlflow.db")
@@ -32,15 +36,21 @@ class ModelLoader:
         #     print(f"Loaded latest model : {model_uri}")
         # Features
         self.features = [
-            'age', 'income', 'tenure_years', 'num_purchases',
-            'website_visits', 'days_since_last_purchase', 'satisfaction_score',
-            'has_credit_card', 'is_newsletter_subscribed'
+            "age",
+            "income",
+            "tenure_years",
+            "num_purchases",
+            "website_visits",
+            "days_since_last_purchase",
+            "satisfaction_score",
+            "has_credit_card",
+            "is_newsletter_subscribed",
         ]
-    
+
     def predict(self, data: dict):
         row = {f: [data.get(f, 0)] for f in self.features}
         df = pd.DataFrame(row)
-        
+
         try:
             prob = self.model.predict_proba(df)[0][1]
             return {"will_buy_probability": round(float(prob), 3)}
