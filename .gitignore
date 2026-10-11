@@ -17,6 +17,6 @@ keys.txt
 
 # The plaintext (unencrypted) secret file — never commit this either
 # Only the .enc.yaml version gets committed
-manifests/postgres-secret.yamlprivate-key.json
+manifests/postgres-secret.yaml
 models/
 private-key.json
